@@ -1,2 +1,8 @@
 .agents
 .claude
+node_modules
+.env
+.env.local
+dist
+.next
+docker-compose.override.yml

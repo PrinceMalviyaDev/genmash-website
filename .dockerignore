@@ -1,0 +1,36 @@
+# Version control
+.git
+.gitignore
+
+# Node modules — installed fresh during build
+node_modules
+**/node_modules
+
+# Build artifacts — rebuilt during Docker build
+frontend/.next
+frontend/out
+backend/dist
+
+# Env files — passed at runtime via docker-compose env_file, never baked into image
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Editor / tooling
+.claude
+.agents
+.vscode
+.idea
+
+# Logs
+**/*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker files themselves (not needed inside build context)
+**/Dockerfile
+**/.dockerignore
+docker-compose*.yml
