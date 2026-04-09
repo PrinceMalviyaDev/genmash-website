@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
-  LayoutDashboard, FolderOpen, FileText, MessageSquare, Users, Star,
+  LayoutDashboard, FolderOpen, FileText, Users, Star,
   Building2, DollarSign, Briefcase, Mail, ClipboardList, Settings,
-  Image, Menu, X, LogOut, ChevronRight,
+  Image, Menu, X, LogOut, Home,
 } from 'lucide-react';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { logout } from '@/lib/adminApi';
 
 const sidebarLinks = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -27,13 +29,29 @@ const sidebarLinks = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { admin, ready } = useAdminAuth();
 
+  // login page has its own layout
   if (pathname === '/admin/login') return <>{children}</>;
+
+  // Wait for auth check so we don't flash-render protected content
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-6 h-6 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/admin/login');
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
@@ -50,7 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400"><X size={20} /></button>
         </div>
 
-        <nav className="mt-4 px-3 space-y-0.5 overflow-y-auto max-h-[calc(100vh-120px)]">
+        <nav className="mt-4 px-3 space-y-0.5 overflow-y-auto max-h-[calc(100vh-180px)]">
           {sidebarLinks.map(link => {
             const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
             return (
@@ -63,16 +81,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800 space-y-2">
           <Link href="/" className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
-            <LogOut size={16} /> Back to Website
+            <Home size={16} /> Back to Website
           </Link>
+          <button onClick={handleLogout}
+            className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
+            <LogOut size={16} /> Log Out
+          </button>
         </div>
       </aside>
 
       {/* Main content */}
       <div className="lg:ml-64">
-        {/* Top bar */}
         <header className="sticky top-0 z-30 bg-white border-b border-slate-100 px-4 lg:px-8 h-16 flex items-center justify-between">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:text-slate-900">
             <Menu size={20} />
@@ -81,7 +102,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {sidebarLinks.find(l => pathname.startsWith(l.href))?.label || 'Admin'}
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">A</div>
+            <div className="hidden sm:block text-right">
+              <div className="text-xs font-medium text-slate-900">{admin?.name || 'Admin'}</div>
+              <div className="text-[10px] text-slate-400">{admin?.role || ''}</div>
+            </div>
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+              {(admin?.name || 'A')[0].toUpperCase()}
+            </div>
           </div>
         </header>
 

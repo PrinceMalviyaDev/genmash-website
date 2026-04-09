@@ -11,6 +11,14 @@ router.get('/', async (_req: Request, res: Response) => {
   } catch { res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to fetch clients' } }); }
 });
 
+// ADMIN - list all including hidden
+router.get('/admin/all', authenticate, async (_req: Request, res: Response) => {
+  try {
+    const data = await Client.find().sort({ order: 1, createdAt: -1 }).lean();
+    res.json({ success: true, data });
+  } catch { res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to fetch clients' } }); }
+});
+
 router.post('/', authenticate, authorize('super_admin', 'editor'), async (req: Request, res: Response) => {
   try { res.status(201).json({ success: true, data: await Client.create(req.body) }); }
   catch (err: any) { res.status(400).json({ success: false, error: { code: 'CREATE_FAILED', message: err.message } }); }

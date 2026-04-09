@@ -11,6 +11,14 @@ router.get('/', async (_req: Request, res: Response) => {
   } catch { res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to fetch testimonials' } }); }
 });
 
+// ADMIN - list all including hidden
+router.get('/admin/all', authenticate, async (_req: Request, res: Response) => {
+  try {
+    const data = await Testimonial.find().sort({ createdAt: -1 }).lean();
+    res.json({ success: true, data });
+  } catch { res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to fetch testimonials' } }); }
+});
+
 router.post('/', authenticate, authorize('super_admin', 'editor'), async (req: Request, res: Response) => {
   try {
     const testimonial = await Testimonial.create(req.body);

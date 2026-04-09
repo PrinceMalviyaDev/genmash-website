@@ -28,6 +28,14 @@ router.get('/featured', async (_req: Request, res: Response) => {
   } catch { res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to fetch featured projects' } }); }
 });
 
+// ADMIN - list all including hidden (must come before /:slug)
+router.get('/admin/all', authenticate, async (_req: Request, res: Response) => {
+  try {
+    const data = await Project.find().sort({ order: 1, createdAt: -1 }).lean();
+    res.json({ success: true, data });
+  } catch { res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to fetch projects' } }); }
+});
+
 router.get('/:slug', async (req: Request, res: Response) => {
   try {
     const project = await Project.findOne({ slug: req.params.slug, isVisible: true }).lean();

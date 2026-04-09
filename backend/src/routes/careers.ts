@@ -17,6 +17,14 @@ router.get('/', async (_req: Request, res: Response) => {
   } catch { res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to fetch jobs' } }); }
 });
 
+// ADMIN - list all including inactive (must come before /:slug)
+router.get('/admin/all', authenticate, async (_req: Request, res: Response) => {
+  try {
+    const data = await JobPosting.find().sort({ postedAt: -1 }).lean();
+    res.json({ success: true, data });
+  } catch { res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to fetch jobs' } }); }
+});
+
 router.get('/:slug', async (req: Request, res: Response) => {
   try {
     const job = await JobPosting.findOne({ slug: req.params.slug, isActive: true }).lean();
