@@ -59,7 +59,7 @@ services:
         value: "1"
 
       # ── Set AFTER backend is deployed ──
-      # e.g. https://genmash-backend.onrender.com
+      # Must include /api/v1 — e.g. https://genmash-backend.onrender.com/api/v1
       # This is baked into the Next.js bundle at build time.
       # You must trigger a frontend redeploy after updating this.
       - key: NEXT_PUBLIC_API_URL
