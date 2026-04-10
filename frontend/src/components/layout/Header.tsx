@@ -26,6 +26,9 @@ export default function Header() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
 
+  // Hide header on admin pages
+  if (pathname.startsWith('/admin')) return null;
+
   // Check if current page has a dark hero section
   const hasDarkHero = DARK_HERO_PAGES.includes(pathname) ||
     pathname.startsWith('/services/') ||

@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Mail,
   Phone,
@@ -36,6 +39,11 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Hide footer on admin pages
+  if (pathname.startsWith('/admin')) return null;
+
   return (
     <footer className="bg-slate-900 text-slate-300">
       {/* Main Footer */}
