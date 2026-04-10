@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   Target,
@@ -7,10 +9,10 @@ import {
   Lightbulb,
   Heart,
   Shield,
-  Users,
   Link2,
   Globe,
 } from 'lucide-react';
+import { getTeamMembers } from '@/lib/api';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -37,16 +39,22 @@ const values = [
   { icon: Heart, title: 'Client First', description: 'Your success is our priority. We go the extra mile to exceed expectations.' },
 ];
 
-const team = [
-  { name: 'Hariom Malviya', role: 'Founder & CEO', linkedin: '#' },
-  { name: 'Srishti Doshi', role: 'Co-Founder & CTO', linkedin: '#' },
-  { name: 'Ankit Patel', role: 'Lead Developer', linkedin: '#' },
-  { name: 'Priya Sharma', role: 'UI/UX Designer', linkedin: '#' },
-  { name: 'Rohan Gupta', role: 'AI/ML Engineer', linkedin: '#' },
-  { name: 'Neha Singh', role: 'Project Manager', linkedin: '#' },
-];
+interface TeamMember {
+  _id: string;
+  name: string;
+  role: string;
+  photo: string;
+  linkedin: string;
+  github: string;
+}
 
 export default function AboutContent() {
+  const [team, setTeam] = useState<TeamMember[]>([]);
+
+  useEffect(() => {
+    getTeamMembers().then(setTeam).catch(() => {});
+  }, []);
+
   return (
     <>
       {/* Hero */}
@@ -217,28 +225,42 @@ export default function AboutContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {team.map((member, i) => (
               <motion.div
-                key={member.name}
+                key={member._id || member.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
                 className="bg-white rounded-2xl p-6 border border-slate-100 text-center hover:shadow-md transition-shadow"
               >
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                  {member.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')}
-                </div>
+                {member.photo ? (
+                  <Image
+                    src={member.photo}
+                    alt={member.name}
+                    width={80}
+                    height={80}
+                    className="w-20 h-20 rounded-full object-cover mx-auto mb-4"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                    {member.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
+                  </div>
+                )}
                 <h3 className="text-lg font-semibold text-slate-900">{member.name}</h3>
                 <p className="text-sm text-blue-600 font-medium">{member.role}</p>
-                <a
-                  href={member.linkedin}
-                  className="inline-flex items-center gap-1 mt-3 text-sm text-slate-400 hover:text-blue-600 transition-colors"
-                >
-                  <Link2 size={14} />
-                  LinkedIn
-                </a>
+                {member.linkedin && (
+                  <a
+                    href={member.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 mt-3 text-sm text-slate-400 hover:text-blue-600 transition-colors"
+                  >
+                    <Link2 size={14} />
+                    LinkedIn
+                  </a>
+                )}
               </motion.div>
             ))}
           </div>
